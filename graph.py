@@ -9,6 +9,10 @@ class Graph:
         self.E = {}
         self.inputs  = set()
         self.outputs = set()
+    
+    def initNodes(self):
+        for _,v in self.V.items():
+            v.initNode()
 
     def addNode(self,node):
         name = node.getName()
@@ -183,9 +187,27 @@ class Graph:
         srcName = src.getName()
         dstName = dst.getName()
         if dst in self.fanout(src):
-            self.E[srcName]['out'].remove(dst)        
-            self.E[dstName]['in'].remove(src)        
+            self.E[srcName]['out'] = list(filter((dst).__ne__, self.E[srcName]['out']))
+            self.E[dstName]['in'] = list(filter((src).__ne__, self.E[srcName]['in']))
     
+    def removeNode(self,vName):
+        v = self.V[vName]        
+        for u in self.fanin(v):
+            e = Edge(u,v)
+            self.removeEdge(e)
+        for u in self.fanout(v):
+            e = Edge(v,u)
+            self.removeEdge(e)
+        for uName in self.V:
+            if v in self.E[uName]['in']:
+                print('ERROR: found {} in E[{}][in]'.format(vName,uName))
+            if v in self.E[uName]['out']:
+                print('ERROR: found {} in E[{}][out]'.format(vName,uName))    
+            
+        del self.E[vName]
+        del self.V[vName]
+        
+        
     def edmonds_karp(self,source,target,maxFlowBound=3):
         self.buildResidualGraph()
         source = self.resG.V["{}_out".format(source.getName())]
@@ -208,7 +230,6 @@ class Graph:
                 self.resG.addEdge(revE)
                 v = parent[vName]
             parent = self.resG.bfs(source, target)
-
         return maxFlow
 
     def printPath(self,path,source,target):
@@ -218,8 +239,7 @@ class Graph:
             vName  = v.getName()
             str = " -> " + vName + str
             v = path[vName]
-        print('amirros debug: path = ',str)
-            
+        print('amirros debug: path = ',str)            
         
     def getEdge(self,srcName,dstName):
         if srcName not in self.E: return False
@@ -229,8 +249,7 @@ class Graph:
                 return Edge(src,dst)
         return False
     
-    def findDisjointPaths(self,source,target):
-        
+    def findDisjointPaths(self,source,target):        
         maxFlow = self.edmonds_karp(source,target)
         print('amirros debug: maxFlow = ',maxFlow)
         if maxFlow != 2: return False
@@ -251,12 +270,6 @@ class Graph:
                     edgesToRemove.append(Edge(resSrc,resDst))
         for e in edgesToRemove:
             self.resG.removeEdge(e)
-        ########
-        # FIXME - bug in extracting the paths from the residual graph
-        # p1 = [self.V['u'],self.V['a'],self.V['e'],self.V['h'],self.V['k'],self.V['m'],self.V['f']]
-        # p2 = [self.V['u'],self.V['b'],self.V['c'],self.V['d'],self.V['g'],self.V['l'],self.V['n'],self.V['f']]
-        # retVal = [p1,p2]
-        # return retVal
         targetRes = self.resG.getNode('{}_in'.format(target.getName()))
         sourceRes = self.resG.getNode('{}_out'.format(source.getName()))
         for i in range(2):
@@ -357,7 +370,7 @@ if __name__ == "__main__":
         secStr = ""
         for v in tup[1]:
             secStr += v.getName() + ','  
-        D_uStr += "(" + firstStr +" , " + secStr + "),"
+        D_uStr += "(" + firstStr +" | " + secStr + "),"
     D_uStr += ")"         
     print(DC.D_u)
     print(D_uStr)

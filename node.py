@@ -6,8 +6,16 @@ class Node:
         self.max    = -1
         self.marked = False
         self.root = False
+    
+    def initNode(self):
+        self.min    = -1
+        self.prime  = -1
+        self.max    = -1
+        self.marked = False
+    
     def __str__(self):
-        print('amirros debug')        
+        print('amirros debug') 
+               
     def setRoot(self):
         self.root = True
     
