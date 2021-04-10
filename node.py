@@ -4,6 +4,7 @@ class Node:
         self.min    = -1
         self.prime  = -1
         self.max    = -1
+        self.hight  = -1
         self.marked = False
         self.root = False
     
@@ -11,6 +12,7 @@ class Node:
         self.min    = -1
         self.prime  = -1
         self.max    = -1
+        self.hight  = -1
         self.marked = False
     
     def __str__(self):
@@ -49,8 +51,15 @@ class Node:
     
     def setPrime(self,val):
         self.prime = val
+ 
     def getPrime(self):
         return self.prime
+    
+    def setHight(self,val):
+        self.hight = val
+    
+    def getHight(self):
+        return self.hight
     
     def printNode(self):
         print("name: {}".format(self.name))

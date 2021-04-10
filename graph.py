@@ -2,7 +2,8 @@ from node import Node
 from edge import Edge
 from dominatorChain import DominatorChain
 import collections
-from gi.overrides.keysyms import target
+import copy
+
 class Graph:
     def __init__(self):
         self.V = {}
@@ -65,27 +66,37 @@ class Graph:
         return self.E[v.getName()]['in']
 
     def transFanout(self,v):
-        dfsList = self.dfs(v)
+        dfsList = self.dfs(v,'fanout')
         return dfsList  
-    
-    def dfs(self,source):
+ 
+    def transFanin(self,v):
+        dfsList = self.dfs(v,'fanin')
+        return dfsList
+         
+    def dfs(self,source,direction='fanout'):
         self.setAllVisited(False)
-        return self.recDfs(source)
+        return self.recDfs(source,direction)
     
     def setAllVisited(self,val):
         self.visited = {}
         for vName in self.V:
             self.visited[vName] = val
             
-    def recDfs(self,source):
+    def recDfs(self,source,direction):
         sourceName = source.getName()    
         if self.visited[sourceName]: return []
         retList = [source]
         self.visited[sourceName] = True
-        for child in self.fanout(source):
-            retList += self.recDfs(child)
-        return retList
-        
+        if direction == 'fanout':
+            children = self.fanout(source)
+        elif direction == 'fanin':
+            children = self.fanin(source)
+        else:
+            print('ERROR: recDfs: unknown dir value = {}'.format(dir))
+            exit()
+        for child in children:
+            retList += self.recDfs(child,direction)
+        return retList        
         
     def findPath(self,sourceName,targetName,sign):
         source = self.V[sourceName]
@@ -133,6 +144,72 @@ class Graph:
             v.printNode()
     
     
+    def bfsTree(self,source,direction,visited = {}):        
+        bfsParentTree = {}
+        for vName in self.V:
+            if vName not in visited:                
+                visited[vName] = False    
+        queue = collections.deque()
+        queue.append(source)
+        source.setHight(0)
+        bfsParentTree[source] = False
+        visited[source.getName()] = True
+        while queue:
+            u = queue.popleft()
+            if direction == 'fanout':
+                children = self.fanout(u)
+            elif direction == 'fanin':
+                children = self.fanin(u)
+            else:
+                print('ERROR: bfsTree - unknown direction = {}'.format(direction))
+                exit()
+            for dst in children:
+                if visited[dst.getName()] == False:
+                    bfsParentTree[dst] = u
+                    dst.setHight(u.getHight()+1)
+                    queue.append(dst)
+                    visited[dst.getName()] = True
+        return bfsParentTree    
+    
+    def getDoubleVertexConOfInf(self,doubleVertexTup):
+        v1 = self.getNode(doubleVertexTup[0])
+        v2 = self.getNode(doubleVertexTup[1])
+        conOfInf1 = self.getNodeConOfInf(v1,'fanin')
+        conOfInf2 = self.getNodeConOfInf(v2,'fanin',conOfInf1)
+        return conOfInf2
+ 
+    def getNodeConOfInf(self,source,direction,prevConOfInf = {}):
+        conOfInf = copy.deepcopy(prevConOfInf)
+        visited = {}
+        for vName in self.V:
+            if vName in conOfInf:
+                visited[vName] = True
+            else:
+                visited[vName] = False                
+        queue = collections.deque()
+        queue.append(source)
+        visited[source.getName()] = True
+        conOfInf[source.getName()] = True
+        while queue:
+            u = queue.popleft()
+            if direction == 'fanout':
+                children = self.fanout(u)
+            elif direction == 'fanin':
+                children = self.fanin(u)
+            else:
+                print('ERROR: bfsTree - unknown direction = {}'.format(direction))
+                exit()
+            for dst in children:
+                if visited[dst.getName()] == False:
+                    conOfInf[dst.getName()] = True
+                    queue.append(dst)
+                    visited[dst.getName()] = True
+        return conOfInf               
+        
+    def getNodeHight(self,nodeName):
+        node = self.getNode(nodeName)
+        return node.getHight()
+        
     def bfs(self,source,target):
         visited = {}
         parent = {}
@@ -249,9 +326,11 @@ class Graph:
                 return Edge(src,dst)
         return False
     
+    def getNodesNum(self):
+        return len(self.V)
+    
     def findDisjointPaths(self,source,target):        
         maxFlow = self.edmonds_karp(source,target)
-        print('amirros debug: maxFlow = ',maxFlow)
         if maxFlow != 2: return False
         retVal = [0,0]
         # remove all original edges from the residual graph:
@@ -287,12 +366,7 @@ class Graph:
                 e = Edge(uRes,vRes)
                 self.resG.removeEdge(e)
                 vRes = reversePathInRes[vResName]
-            retVal[i] = pathInOrig
-            s = ""
-            for u in pathInOrig:
-                s = s + u.getName() + ' -> '
-            print('amirros debug: p = ',s)
-                
+            retVal[i] = pathInOrig                
         return retVal
       
 if __name__ == "__main__":
@@ -362,6 +436,18 @@ if __name__ == "__main__":
     
     # G.printGraph()
     DC = DominatorChain(G,f,u)
+    dfsNode = d
+    dfsList = G.transFanout(dfsNode)
+    s = ""
+    for node in dfsList:
+        s += node.getName() + ' '    
+    print('transFanout: ',s)
+    dfsList = G.transFanin(dfsNode)
+    s = ""
+    for node in dfsList:
+        s += node.getName() + ' '   
+    print('transFanin: ',s)
+    exit()
     D_uStr = "("
     for tup in DC.D_u:
         firstStr = ""
