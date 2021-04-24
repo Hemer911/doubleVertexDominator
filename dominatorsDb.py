@@ -1,7 +1,7 @@
 from buildStaticDb import BuildStaticDb
 from dominatorChain import DominatorChain
 import pickle
-
+from graphSplitter import GraphSplitter
 class DominatorsDb:
      
     def __init__(self,dirName,fileName,validate=True,loadPkl=False):
@@ -191,6 +191,13 @@ if __name__ == "__main__":
     dirName = 'hwmcc20/aig/2019/wolf/2019C'
     validate = False
     loadPkl = True
-    DominatorsDb(dirName,fileName,validate=validate,loadPkl=loadPkl)
-    
+    domDb = DominatorsDb(dirName,fileName,validate=validate,loadPkl=loadPkl)
+    g = domDb.g
+    domTup = ('Inverter_39', 'Inverter_699')
+    conOfInf = domDb.domTupConOfInf[domTup]
+    numG = g.getNodesNum()
+    (aig1,cutG) = GraphSplitter.splitGraph(g,domTup)
+    # run native
+    # run aig1 
+    print("cutG = {}, g = {}, cutG/g = {}, len(conOfInf) = {}".format(cutG.getNodesNum(),numG,cutG.getNodesNum()/numG*100, len(conOfInf)))
     

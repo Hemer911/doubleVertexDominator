@@ -31,7 +31,7 @@ class Node:
         return self.marked
         
     def isMarked(self):
-        if self.marked: return True
+        if self.getMark(): return True
         return False
 
     def getName(self):

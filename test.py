@@ -58,7 +58,14 @@ def validateDominatorsTuples(domTupList,graphPklFileName,inpName):
             continue
     return retVal
 
-
+def exportTest(dirName,fileName):
+    dataBaseDir  = dirName + '/' + fileName
+    aagPklFileName    = dataBaseDir + '/' + fileName + '.pkl'
+    outPath = dataBaseDir + '/amirrosTry.aag'
+    with open(aagPklFileName,'rb') as fh:
+        aag1 = pickle.load(fh)
+    aag1.write(outPath)    
+    
 def testFile(dirName,fileName):
     aigFileName  = dirName + '/' + fileName + '.aig'
     dataBaseDir  = dirName + '/' + fileName
@@ -176,10 +183,11 @@ def getDomTupList(inputDict):
 if __name__ == "__main__":
     fileName  = 'qspiflash_qflexpress_divfive-p094'
     dirName = 'hwmcc20/aig/2019/wolf/2019C'
+    exportTest(dirName,fileName)
     # testFile(dirName,fileName)
     # for (dirName,fileName) in validDominatorsDb:
     #     loadAndValidateDb(dirName,fileName)
     # findAllDominatorsForDb(wolfDb,10000)
-    bfsTree = buildBfsTree(dirName,fileName,'fanin')
+    #bfsTree = buildBfsTree(dirName,fileName,'fanin')
     
     

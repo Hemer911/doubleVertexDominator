@@ -3,11 +3,13 @@ from edge import Edge
 from dominatorChain import DominatorChain
 import collections
 import copy
+import re
 
 class Graph:
     def __init__(self):
         self.V = {}
         self.E = {}
+        self.latches = {}
         self.inputs  = set()
         self.outputs = set()
     
@@ -24,7 +26,12 @@ class Graph:
         self.E[name] = {}
         self.E[name]['in'] = []
         self.E[name]['out'] = []
+        if re.search('^LatchIn_',name):
+            self.latches[name] = node
         node.mark(False)
+    
+    def getLatches(self):
+        return self.latches
     
     def markAllNodes(self,val):
         for _,node in self.V.items():
@@ -124,7 +131,10 @@ class Graph:
         if name in self.V:
             return self.V[name]
         return False
-
+    
+    def getNodes(self):
+        return list(self.V.values())
+    
     def markPath(self,path,sign):
         if not path: return
         
@@ -136,6 +146,9 @@ class Graph:
             node.mark(sign)
     
     def printGraph(self):
+        print('outputs: = {}'.format(self.outputs))
+        print('inputs: = {}'.format(self.inputs))
+        print('latches: = {}'.format(self.latches.keys()))
         for vName,v in self.V.items():
             conn = ""
             for node in self.fanout(v):
@@ -265,7 +278,7 @@ class Graph:
         dstName = dst.getName()
         if dst in self.fanout(src):
             self.E[srcName]['out'] = list(filter((dst).__ne__, self.E[srcName]['out']))
-            self.E[dstName]['in'] = list(filter((src).__ne__, self.E[srcName]['in']))
+            self.E[dstName]['in'] = list(filter((src).__ne__, self.E[dstName]['in']))
     
     def removeNode(self,vName):
         v = self.V[vName]        
@@ -282,9 +295,8 @@ class Graph:
                 print('ERROR: found {} in E[{}][out]'.format(vName,uName))    
             
         del self.E[vName]
-        del self.V[vName]
-        
-        
+        del self.V[vName]         
+            
     def edmonds_karp(self,source,target,maxFlowBound=3):
         self.buildResidualGraph()
         source = self.resG.V["{}_out".format(source.getName())]
