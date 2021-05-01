@@ -58,6 +58,32 @@ class Graph:
             exit()
         self.inputs.add(name)
     
+    def undefineInput(self,node):
+        name = node.getName()
+        if name not in self.V: 
+            print("ERROR: undefineInput node name = {} is not part of the graph.".format(name))
+            exit()
+        if name in self.inputs:
+            self.inputs.remove(name)
+
+    def connectGraph(self,subGraph,listOfNamedConnections):
+        for _,subV in subGraph.V.items():
+            self.addNode(subV)
+        for subSrcName,edgeDict in subGraph.E.items():
+            for subDstNode in edgeDict['out']:
+                src = self.getNode(subSrcName)
+                dst = self.getNode(subDstNode.getName())
+                self.addEdge(Edge(src,dst))
+        for namedConn in listOfNamedConnections:
+            srcName = namedConn[0]
+            dstName = namedConn[1]
+            src = self.getNode(srcName)
+            dst = self.getNode(dstName)
+            self.addEdge(Edge(src,dst))            
+        
+    def isInput(self,name):
+        return name in self.inputs             
+    
     def defineOutput(self,node):
         name = node.getName()
         if name not in self.V: 

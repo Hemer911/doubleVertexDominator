@@ -1,4 +1,5 @@
 import aiger
+from util import Util
 from node import Node
 from edge import Edge
 from graph import Graph
@@ -43,8 +44,17 @@ class BuildStaticDb:
         cmd = ['./aigtoaig',fullAigFileName,fullAagFileName]
         print('executing cmd: ',cmd)
         call(cmd)
-        return False
-    
+
+    @staticmethod
+    def convertAagToAig(dirName,fileName):
+        print('-> convertAagToAig')
+        fullAigFileName = dirName + '/' + fileName + '.aig'
+        fullAagFileName = dirName + '/' + fileName + '.aag'
+        # if not os.path.isfile(fullAagFileName):
+        cmd = ['./aigtoaig',fullAagFileName,fullAigFileName]
+        print('executing cmd: ',cmd)
+        call(cmd)
+ 
     @staticmethod
     def loadAagAndExportToPkl(dirName,fileName):
         print('-> loadAagAndExportToPkl')
@@ -145,7 +155,7 @@ class BuildStaticDb:
                
     @staticmethod
     def convertNewAigFormatToLegacy(dirName,fileName):
-        abcPath = '/Users/amirrosenbaum/git/abc'
+        abcPath = Util.abcPath
         inputFilePath  =  dirName + '/' + fileName + '.aig'
         outputFilePath =  BuildStaticDb.getOutputDirPath(dirName, fileName) + '/' + fileName + '_update.aig'
         if not os.path.isfile(outputFilePath):

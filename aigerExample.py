@@ -4,6 +4,7 @@ from edge import Edge
 from graph import Graph
 import pickle
 from graphSplitter import GraphSplitter
+from dominatorsAndSATSolver import DominatorsAndSATSolver
 o = Node('out1')
 l1 = Node('LatchIn_1')
 l2 = Node('LatchIn_2')
@@ -61,11 +62,10 @@ g.addEdge(Edge(l1,and5))
 g.addEdge(Edge(not1,and5))
 g.addEdge(Edge(pi1,not1))
 
-outAtom = GraphSplitter.graphToAig(g)
-print(outAtom)
-domTup = ('LatchIn_1','LatchIn_2')
-cutG = GraphSplitter.splitGraph(g, domTup)
 
+domTup = ('LatchIn_1','LatchIn_2')
+(restGAig,cutG) = GraphSplitter.splitGraph(g, domTup)
+DominatorsAndSATSolver.solveGraph(restGAig, cutG, domTup,boundT=10)
 exit()
 
 

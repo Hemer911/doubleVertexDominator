@@ -192,6 +192,10 @@ if __name__ == "__main__":
     validate = False
     loadPkl = True
     domDb = DominatorsDb(dirName,fileName,validate=validate,loadPkl=loadPkl)
+    for domTup,conOfInf in domDb.domTupConOfInf.items():
+        conOfInfPer = len(conOfInf) / domDb.g.getNodesNum() * 100
+        if conOfInfPer < 50:
+            print('{} have {}% influence'.format(domTup,conOfInfPer))
     g = domDb.g
     domTup = ('Inverter_39', 'Inverter_699')
     conOfInf = domDb.domTupConOfInf[domTup]

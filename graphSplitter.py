@@ -3,8 +3,10 @@ from node import Node
 from edge import Edge
 import re
 import aiger
+from util import Util
 class GraphSplitter:
     
+    printDebug = False   
     @staticmethod
     def splitGraph(g,domTup):
         v1Name = domTup[0]
@@ -15,12 +17,12 @@ class GraphSplitter:
         out     = g.getNode(outName)
         GraphSplitter.replaceNodeWithNewInp(g,v1)
         GraphSplitter.replaceNodeWithNewInp(g,v2)
-        gCut  = GraphSplitter.cutGraph(g,[v1,v2])
-        gRest = GraphSplitter.cutGraph(g,[out])
-        gRestOut = gRest.getNode(outName)
-        gRest.defineOutput(gRestOut)
-        aig1  = GraphSplitter.graphToAig(gRest)      
-        return (aig1,gCut)
+        smallCutG  = GraphSplitter.cutGraph(g,[v1,v2])
+        bigCutG    = GraphSplitter.cutGraph(g,[out])
+        bigCutGOut = bigCutG.getNode(outName)
+        bigCutG.defineOutput(bigCutGOut)
+        # bigCutGAig  = GraphSplitter.graphToAig(bigCutG)      
+        return (bigCutG,smallCutG)
         
     @staticmethod
     def cutGraph(g,outputsList):
@@ -56,7 +58,7 @@ class GraphSplitter:
         combExpr = combExpr.with_output(out.getName())
         fullAig  = combExpr.aig
         for latchName,latchNode in latches.items():
-            print('amirros debug: latchName = {}'.format(latchName))
+            Util.amirrosDebug('latchName = {}'.format(latchName),GraphSplitter.printDebug)
             faninNode = g.fanin(latchNode)[0] 
             combExpr = GraphSplitter.getCombExpr(g,faninNode)
             combExpr = combExpr.with_output(latchName+'_CO')
@@ -68,14 +70,20 @@ class GraphSplitter:
     @staticmethod
     def getCombExpr(g,node):
         nodeName = node.getName()
-        print('amirros debug: getCombExpr - nodeName = {}'.format(nodeName))
+        Util.amirrosDebug('getCombExpr - nodeName = {}'.format(nodeName),GraphSplitter.printDebug)
         if re.search("^Input_",nodeName):
-            atomName = nodeName.replace("Input_","")
-            return aiger.atom(atomName)
+            if g.isInput(nodeName):
+                atomName = nodeName.replace("Input_","")
+                return aiger.atom(atomName)
+            else:
+                fanin = g.fanin(node)
+                if len(fanin) != 1:
+                    print('ERROR: unknown node type. nodeName = {} with unknown fanin len = {}'.format(nodeName,len(fanin)))
+                    exit()
+                child = fanin[0]
+                return GraphSplitter.getCombExpr(g,child)
         elif re.search("^ConstFalse_",nodeName):            
-            retVal = aiger.atom(nodeName) & False
-            print('amirros debug: retVal = ',retVal)
-            return retVal
+            return aiger.atom(nodeName) & False
         elif re.search("^LatchIn_",nodeName):
             atomName = nodeName + "_CI"
             return aiger.atom(atomName)

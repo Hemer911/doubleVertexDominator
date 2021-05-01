@@ -34,6 +34,9 @@ class Node:
         if self.getMark(): return True
         return False
 
+    def changeName(self,newName):
+        self.name = newName
+
     def getName(self):
         return self.name
     
