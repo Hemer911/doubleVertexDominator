@@ -15,7 +15,6 @@ It leverages the power of double vertex dominators to split an AIG graph to 2 cu
 The main function is proveProperty.
 """
 class DominatorsAndSATSolver:
-
     @staticmethod
     # proveProperty tries to find a counter example in G by splitting it into 2 graphs using a double vertex dominators tuple.
     # @param: G - An AIG
@@ -27,9 +26,12 @@ class DominatorsAndSATSolver:
     #           counter example: in case that a counter example found.
     #           False: tried iterationsBound iterations without finding counter example and without reaching to framesBound in any iteration.
     def proveProperty(G,domTup,iterationsBound,framesBound):
+        print('-> DominatorsAndSATSolver.proveProperty: split graph')
         (bigCutG,smallCutG) = GraphSplitter.splitGraph(G,domTup)
+        print('-> DominatorsAndSATSolver.proveProperty: find intersect inputs')
         intersectInputs = bigCutG.inputs.intersection(smallCutG.inputs)
         for iterNum in range(iterationsBound):
+            print('-> DominatorsAndSATSolver.proveProperty: proveIteration {}'.format(iterNum))
             # TODO - send copy of small cut 
             retVal = DominatorsAndSATSolver.proveIteration(bigCutG,smallCutG,domTup,intersectInputs,framesBound,iterNum)
             if retVal: return retVal
@@ -37,13 +39,18 @@ class DominatorsAndSATSolver:
 
     @staticmethod    
     def proveIteration(bigCutG,smallCutG,domTup,intersectInputs,framesBound,iterNum):
+        print('-> DominatorsAndSATSolver.proveIteration: findCex bigCut')
         cexBigCut = DominatorsAndSATSolver.findCex(bigCutG,'bigCutG',framesBound)
         if not cexBigCut: return "PASS"
+        print('-> DominatorsAndSATSolver.proveIteration: augmentConstInputs')
         DominatorsAndSATSolver.augmentConstInputs(smallCutG,intersectInputs,cexBigCut,iterNum)
+        print('-> DominatorsAndSATSolver.proveIteration: augmentProperty')
         DominatorsAndSATSolver.augmentProperty(smallCutG,domTup,cexBigCut,iterNum)
+        print('-> DominatorsAndSATSolver.proveIteration: findCex smallCut')
         cexSmallCut = DominatorsAndSATSolver.findCex(smallCutG,'smallCutG',framesBound)
         if cexSmallCut:
             return DominatorsAndSATSolver.concatCex(cexBigCut,cexSmallCut,domTup)
+        print('-> DominatorsAndSATSolver.proveIteration: augmentAssumption')
         DominatorsAndSATSolver.augmentAssumption(bigCutG,domTup,cexBigCut,iterNum)
         return False  
 
@@ -52,14 +59,27 @@ class DominatorsAndSATSolver:
         abcPath = Util.abcPath
         outDirPath  = '.'
         cutGAagPath = outDirPath + '/' + fileName + '.aag'
-        cutG.write(cutGAagPath)
+        print('-> DominatorsAndSATSolver.findCex: graphToAig')
+        cutGAsAig = GraphSplitter.graphToAig(cutG)
+        cutGAsAig.write(cutGAagPath)
+        print('-> DominatorsAndSATSolver.findCex: convertAagToAig')
         BuildStaticDb.convertAagToAig(outDirPath,fileName)
         cutGAigPath = outDirPath + '/' + fileName + '.aig'
-        cmd = ['{}/./abc'.format(abcPath),'-c', "read {}; bmc3 -v -F {}".format(cutGAigPath,framesBound)]  
+        cmd = ['{}/./abc'.format(abcPath),'-c', "read {}; print_io; bmc3 -v -F {}; write_aiger_cex cex_tmp.aig".format(cutGAigPath,framesBound)]  
         print('executing cmd: ',cmd)
-        call(cmd)
-        # TODO - create and parse log
-        return False
+        print('-> DominatorsAndSATSolver.findCex: call abc')
+        with open('log.txt','w') as fh:
+            call(cmd,stdout=fh)
+        print('-> DominatorsAndSATSolver.findCex: read log')
+        with open('log.txt','r') as fh:
+            lines = fh.read().splitlines()
+        for line in lines:
+            if "Property proved" in line:
+                return False
+            else:
+                print('amirros debug: no "Property proved" string')
+                exit()          
+
 
     @staticmethod
     def augmentConstInputs(cutG,inputsList,cex,iterNum):
@@ -175,8 +195,7 @@ class DominatorsAndSATSolver:
             retGraph.addNode(not2Node)
             retGraph.addEdge(Edge(not2Node,andNode))
             inp2Fanout = not2Node
-        retGraph.addEdge(Edge(in2Node,inp2Fanout))
-        
+        retGraph.addEdge(Edge(in2Node,inp2Fanout))        
         return retGraph
     
     @staticmethod

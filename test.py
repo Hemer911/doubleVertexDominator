@@ -17,14 +17,12 @@ if __name__ == "__main__":
     #fileName  = 'krebs.3.prop1-func-interl'
     validate = False
     loadPkl = True
+    iterationsBound = 3
+    framesBound     = 10
     print('-> genDb')
     domDb = DominatorsDb(dirName,fileName,validate=validate,loadPkl=loadPkl)
     g = domDb.g
     print('-> choose double vertex dominators')
     domTup = ('Inverter_39', 'Inverter_699') # 15%
     #domTup = ('Inverter_39', 'AndGate_22') # 50%
-    print('-> split graphs')
-    (restGAig,cutG) = GraphSplitter.splitGraph(g,domTup)
-    DominatorsAndSATSolver.handleCutGraph(cutG,domTup,[],[])
-    print('-> solve for splitted graph')
-    DominatorsAndSATSolver.solveGraph(restGAig, cutG, domTup,boundT=600)
+    DominatorsAndSATSolver.proveProperty(g,domTup,iterationsBound,framesBound)

@@ -1,11 +1,11 @@
-wolfDb = [(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p017'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p029'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p036'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p038'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p048'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p075'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p079'),
-(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p094'),
+wolfDb = [(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p017'), # PASS
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p029'), # PASS
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p036'), # PASS
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p038'), # PASS
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p048'), # PASS
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p075'), # run with int but dindn't converge (more than 20 steps)
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p079'), # run with int but dindn't converge (more than 10 steps)
+(3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p094'), # run with int but dindn't converge (more than 10 steps)
 (3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p100'),
 (3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p104'),
 (3165,'hwmcc20/aig/2019/wolf/2019C/qspiflash_qflexpress_divfive-p121'),
