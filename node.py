@@ -68,3 +68,28 @@ class Node:
         print("name: {}".format(self.name))
         print("marked: {}".format(self.marked))
         print('----------------')
+
+class AndNode(Node):
+    fanin = 2
+    def __init__(self,name):
+        Node.__init__(self,name)
+
+class NotNode(Node):
+    fanin = 1
+    def __init__(self,name):
+        Node.__init__(self,name)
+
+class CINode(Node):
+    fanin = 0
+    def __init__(self,name):
+        Node.__init__(self,name)
+
+class CONode(Node):
+    fanin = 1
+    def __init__(self,name):
+        Node.__init__(self,name)
+
+class PINode(Node):
+    fanin = 0
+    def __init__(self,name):
+        Node.__init__(self,name)
